@@ -22,6 +22,7 @@ public class AtomicMulticast {
 
 		MulticastSocket socket = new MulticastSocket(porta);
 		InetAddress grupo = InetAddress.getByName(grupoAddress);
+		socket.setSoTimeout(100);
 
 		socket.joinGroup(grupo);
 
@@ -31,22 +32,25 @@ public class AtomicMulticast {
 			socket.send(pacoteInicial);
 			System.out.println("Iniciador diz: VOTE_REQUEST");
 		}
-
+		int count = 0;
 		while (true) {
 			try {
 				
 				// Verifica as respostas de todos
 				if (iniciador) {
 					try {
-						int count = 0;
-						
 						while(count < 5) {
 							byte[] received 				= new byte[1024];
 							DatagramPacket pacote 	= new DatagramPacket(received,received.length);
-							socket.receive(pacote);
+							try {
+								socket.receive(pacote);
+								
+							} catch (Exception e) {}
+							socket.setSoTimeout(100);
 							String recebido 				= new String(pacote.getData(),0,pacote.getLength());
-							String message 					= recebido.split("\\s")[1];
-
+							String[] recebidoArray = recebido.split("\\s");
+							if (recebidoArray.length < 2) break;
+							String message 					= recebidoArray[1];
 							if (!message.equals("VOTE_REQUEST")) {
 								votes.add(message);
 							}
@@ -63,7 +67,7 @@ public class AtomicMulticast {
 						socket.send(pacoteResponse);
 						System.out.println("Iniciador diz: "+response);
 						break;
-					} catch (InterruptedException e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
