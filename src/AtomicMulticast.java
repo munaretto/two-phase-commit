@@ -89,7 +89,7 @@ public class AtomicMulticast {
 					}
 
 					if (message.equals("GLOBAL_COMMIT") || message.equals("GLOBAL_ABORT")) {
-						System.out.println("Resposta final: ");
+						System.out.println("Resposta final: "+message);
 						break;
 					}
 				}
